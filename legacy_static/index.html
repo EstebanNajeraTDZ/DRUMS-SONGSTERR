@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donner DED-300X | Songsterr Drum Practicer & Studio</title>
+    <meta name="description" content="Practicador interactivo de batería para Donner DED-300X con soporte de partituras Songsterr, metrónomo profesional y notación visual con sticking R/L/K.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=5">
+    <!-- YouTube IFrame Player API for authentic Songsterr video & backing audio playback -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+        <div class="header-left">
+            <div class="brand-logo">
+                <span class="logo-icon">⚡</span>
+                <div class="logo-text">
+                    <span class="brand-title">DONNER DED-300X</span>
+                    <span class="brand-sub">STUDIO & PRACTICER</span>
+                </div>
+            </div>
+            <div class="current-track-badge" title="Canción actualmente cargada">
+                <span class="track-label">CANCION:</span>
+                <span id="song-title" class="track-title">Cargando...</span>
+                <span class="track-sep">•</span>
+                <span id="song-artist" class="track-artist">...</span>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <!-- MIDI Status Indicator -->
+            <div id="midi-status-badge" class="midi-status-card" title="Estado de conexión Donner DED-300X">
+                <span id="midi-status-indicator" class="status-dot offline"></span>
+                <span id="midi-status-text">Buscando Donner DED-300X...</span>
+            </div>
+
+            <!-- Academy & Lessons Button -->
+            <button id="open-academy-btn" class="btn btn-academy" title="Biblioteca de Rudimentos (PAS 40), Fills Icónicos y Grooves de Coordinación">
+                <span>🎓 Academia</span>
+            </button>
+
+            <!-- Songsterr Search Button -->
+            <button id="open-search-modal-btn" class="btn btn-primary">
+                <span>🔍 Buscar Canción</span>
+            </button>
+
+            <!-- Header Mobile Fast Actions -->
+            <button id="header-search-btn" class="btn btn-primary header-mobile-btn" title="Buscar canción">🔍</button>
+            <button id="header-sidebar-btn" class="btn btn-secondary header-mobile-btn" title="Ver Partitura Completa">📖</button>
+
+            <!-- Export Buttons -->
+            <div class="export-group">
+                <button id="export-midi-btn" class="btn btn-secondary" title="Descargar pista en formato MIDI para tu DAW">
+                    <span>⬇ MIDI</span>
+                </button>
+                <button id="export-gp5-btn" class="btn btn-secondary" title="Descargar archivo Guitar Pro 5 (.gp5)">
+                    <span>⬇ GP5</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-container">
+        <div class="studio-two-column-layout">
+            <!-- Left Main Column: Practicer & Controls -->
+            <div class="practicer-main-col">
+                <!-- Songsterr Studio Audio & YouTube Player Controller (Segmented Cards) -->
+                <div class="songsterr-audio-controller">
+                    <!-- Segment 1: Track Audio Source Dropdown & Mode -->
+                    <div class="audio-ctrl-card source-card">
+                        <div class="ctrl-card-title">🎵 PISTA DE AUDIO & VIDEO</div>
+                        <div class="source-select-wrapper">
+                            <span class="source-icon">🎧</span>
+                            <select id="audio-source-select" class="songsterr-dropdown" title="Selecciona la pista de audio de Songsterr">
+                                <option value="full">Mezcla completa (Audio Original)</option>
+                                <option value="backing">Pista de acompañamiento (Sin Batería)</option>
+                                <option value="solo">Pista Solo (Instrumento)</option>
+                                <option value="synth">Sintetizador Virtual (Web Drums)</option>
+                            </select>
+                        </div>
+                        <div class="source-actions-row">
+                            <button id="toggle-yt-video-btn" class="btn btn-secondary-subtle small-btn" title="Mostrar / Ocultar pantalla de video de YouTube">
+                                🎬 <span id="yt-video-btn-text">Ver Video</span>
+                            </button>
+                            <!-- Practice Mode Pill (CON CANCIÓN / SIN CANCIÓN) -->
+                            <div class="songsterr-mode-pill" title="Elige si deseas escuchar la canción original o practicar solo con tu batería y el metrónomo">
+                                <button id="mode-orig-btn" class="mode-pill-opt active" data-mode="orig">CON CANCIÓN</button>
+                                <button id="mode-synth-btn" class="mode-pill-opt" data-mode="synth">SIN CANCIÓN</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Segment 2: Speed & Audio/Video Sync Controls -->
+                    <div class="audio-ctrl-card speed-sync-card">
+                        <div class="ctrl-card-title">⏱ VELOCIDAD & SINCRONIZACIÓN</div>
+                        <!-- Speed Controller (50%, 75%, 100%, 125%) -->
+                        <div class="songsterr-speed-group" title="Velocidad de reproducción">
+                            <span class="speed-runner-icon">🏃</span>
+                            <div class="speed-buttons-pill">
+                                <button class="speed-opt-btn" data-speed="0.5">50%</button>
+                                <button class="speed-opt-btn" data-speed="0.75">75%</button>
+                                <button class="speed-opt-btn active" data-speed="1.0">100%</button>
+                                <button class="speed-opt-btn" data-speed="1.25">125%</button>
+                            </div>
+                        </div>
+
+                        <!-- Audio/Songsterr Sync Offset Calibration -->
+                        <div id="songsterr-sync-group" class="songsterr-sync-group" title="Ajuste de sincronización entre el audio del video y la partitura">
+                            <div class="sync-buttons-pill">
+                                <button id="offset-minus-500-btn" class="sync-nudge-btn" title="Adelantar audio 500ms (-0.5s)">-0.5s</button>
+                                <button id="offset-minus-100-btn" class="sync-nudge-btn" title="Adelantar audio 100ms (-0.1s)">-0.1s</button>
+                                <button id="offset-minus-20-btn" class="sync-nudge-btn" title="Adelantar audio 20ms">-20ms</button>
+                                <span id="sync-offset-display" class="sync-val-badge" title="Haz clic para restablecer la sincronización a 0 ms">0 ms</span>
+                                <button id="offset-plus-20-btn" class="sync-nudge-btn" title="Atrasar audio 20ms">+20ms</button>
+                                <button id="offset-plus-100-btn" class="sync-nudge-btn" title="Atrasar audio 100ms (+0.1s)">+0.1s</button>
+                                <button id="offset-plus-500-btn" class="sync-nudge-btn" title="Atrasar audio 500ms (+0.5s)">+0.5s</button>
+                            </div>
+                            <button id="sync-capture-beat1-btn" class="btn btn-secondary-subtle small-btn" title="Fijar el segundo actual del video como Beat 1 para alinear intros habladas o videos con silencios">
+                                🎯 Fijar Beat 1
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Segment 3: Auto-Demo Mode & Master Volume Boost (0% - 200%) -->
+                    <div class="audio-ctrl-card demo-volume-card">
+                        <div class="ctrl-card-title">🔊 VOLUMEN & DEMO BATERÍA</div>
+                        <div class="demo-vol-row">
+                            <!-- Auto Drummer / Demo Mode Button -->
+                            <button id="auto-demo-btn" class="btn btn-auto-demo" title="Modo Auto / Demo: Las notas suenan solas automáticamente para que escuches la batería sonar">
+                                <span class="demo-icon">🤖</span>
+                                <span id="demo-btn-text">MODO DEMO: OFF</span>
+                            </button>
+
+                            <!-- Master Drum Volume Slider with 200% Boost -->
+                            <div class="volume-boost-wrapper" title="Volumen maestro de batería con Boost de hasta 200%">
+                                <span class="vol-icon">🔊</span>
+                                <input type="range" id="drum-volume-slider" min="0" max="200" value="100" class="vol-slider">
+                                <span id="drum-volume-badge" class="vol-badge">100%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collapsible YouTube Video Player Screen -->
+                <div id="youtube-player-container" class="youtube-player-container collapsed">
+                    <div class="yt-header">
+                        <span id="yt-now-playing" class="yt-title">Reproductor Songsterr Original (YouTube Sync)</span>
+                        <div class="yt-header-actions">
+                            <button id="yt-set-beat1-btn" class="btn btn-secondary-subtle small-btn" title="Pausa el video en el momento exacto en que empieza la música y pulsa aquí para sincronizar el Beat 1">
+                                🎯 Sincronizar Beat 1 Aquí
+                            </button>
+                            <button id="yt-close-btn" class="yt-close-btn" title="Ocultar video">&times;</button>
+                        </div>
+                    </div>
+                    <div class="yt-frame-wrapper">
+                        <div id="youtube-iframe-holder"></div>
+                    </div>
+                </div>
+
+                <!-- Controls & Section Selector Bar (Segmented & Responsive) -->
+                <div class="practice-toolbar">
+                    <!-- Row 1: Practice Mode & Chunking + Auto-Advance + Sidebar Button -->
+                    <div class="toolbar-row practice-mode-row">
+                        <div class="toolbar-item-group">
+                            <span class="section-label">MODO PRÁCTICA:</span>
+                            <div class="chunk-buttons">
+                                <button class="chunk-size-btn" data-size="1" id="chunk-1-btn">1 Compás</button>
+                                <button class="chunk-size-btn" data-size="2" id="chunk-2-btn">2 Compases</button>
+                                <button class="chunk-size-btn" data-size="4" id="chunk-4-btn">4 Compases</button>
+                                <button class="chunk-size-btn active" data-size="0" id="chunk-cont-btn">Continuo</button>
+                            </div>
+                        </div>
+
+                        <div class="toolbar-item-group">
+                            <label class="toggle-control" title="Avanza automáticamente al compás siguiente">
+                                <input type="checkbox" id="auto-advance-toggle" checked>
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-text">Auto-Avanzar</span>
+                            </label>
+                            <button id="toggle-sidebar-nav-btn" class="btn btn-secondary-subtle sidebar-open-btn" title="Mostrar u ocultar la partitura completa">
+                                📖 Partitura Completa
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Measure Navigator (Arrows, Readout, Full-Width Scrubber) -->
+                    <div class="toolbar-row measure-nav-row">
+                        <div class="measure-stepper-wrap">
+                            <button id="prev-measure-btn" class="nav-arrow-btn" title="Compás Anterior (Flecha Izquierda)">◀</button>
+                            <div class="measure-readout">
+                                <span class="meas-tag">COMPÁS</span>
+                                <span id="current-measure-num" class="meas-curr">1</span>
+                                <span class="meas-slash">/</span>
+                                <span id="total-measures-display" class="meas-total">1</span>
+                            </div>
+                            <button id="next-measure-btn" class="nav-arrow-btn" title="Compás Siguiente (Flecha Derecha)">▶</button>
+                        </div>
+                        <div class="measure-slider-wrap">
+                            <input type="range" id="measure-slider" min="0" max="0" value="0" class="measure-slider-bar" title="Desliza para moverte a cualquier compás de la canción">
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Song Sections & Kit Sound & Options -->
+                    <div class="toolbar-row settings-row">
+                        <div class="toolbar-item-group">
+                            <span class="section-label">SECCIÓN:</span>
+                            <select id="section-select" class="custom-select" title="Saltar a una sección"></select>
+                        </div>
+
+                        <div class="toolbar-item-group">
+                            <span class="section-label">KIT SONIDO:</span>
+                            <select id="drum-kit-select" class="custom-select" title="Selecciona el set de sonido de tu batería">
+                                <option value="original">🥁 Acústico Studio (Samples Reales)</option>
+                                <option value="rock">🎸 Rock & Heavy Punch</option>
+                                <option value="jazz">🎷 Jazz Vintage Bop</option>
+                                <option value="electronic">⚡ Electro 808</option>
+                                <option value="donner_direct">🎧 Audio Directo Consola Donner</option>
+                            </select>
+                        </div>
+
+                        <div class="toolbar-item-group">
+                            <span class="section-label">MANO GUÍA:</span>
+                            <select id="handedness-select" class="custom-select small">
+                                <option value="right">Diestro (R-Lead)</option>
+                                <option value="left">Zurdo (L-Lead)</option>
+                            </select>
+                            <label class="toggle-control" title="Escuchar sonido de batería de la canción">
+                                <input type="checkbox" id="drum-audio-toggle" checked>
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-text">Pista Batería</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+        <!-- Section 1: Drum Notation Card (Matches Image 1 Top) -->
+        <div class="notation-wrapper">
+            <div class="notation-card-header">
+                <div class="notation-title-group">
+                    <span class="notation-title">DRUM NOTATION</span>
+                    <span class="notation-badge">PARTITURA PROFESIONAL</span>
+                </div>
+                <div class="notation-controls">
+                    <button id="toggle-scroll-mode-btn" class="notation-btn active" title="Alternar entre Pista Continua (Guitar Hero / Scroll suave) y Compás Fijo">🎮 GUITAR HERO: ON</button>
+                    <button id="toggle-cursor-btn" class="notation-btn active">CURSOR: ON</button>
+                    <button id="toggle-sticking-btn" class="notation-btn active">STICKING: ON</button>
+                    <button id="toggle-legend-btn" class="notation-btn" title="Ver guía de notación Songsterr">📋 LEYENDA NOTAS</button>
+                </div>
+            </div>
+            <div class="notation-canvas-container">
+                <canvas id="notation-canvas" width="1280" height="175"></canvas>
+            </div>
+
+            <!-- Songsterr Drum Notation Visual Guide Panel (Matches Image 1 reference) -->
+            <div id="songsterr-legend-panel" class="songsterr-legend-panel hidden">
+                <div class="legend-header">
+                    <span class="legend-title">📖 GUÍA OFICIAL DE NOTACIÓN SONGSTERR</span>
+                    <button id="close-legend-btn" class="close-legend-btn">&times;</button>
+                </div>
+                <div class="legend-grid">
+                    <div class="legend-category">
+                        <span class="cat-title">CHARLES (HI-HAT)</span>
+                        <div class="legend-items">
+                            <div class="legend-item"><span class="legend-sym hihat">×</span> <span class="legend-desc"><strong>Cerrado:</strong> Cruz arriba pentagrama (R/L)</span></div>
+                            <div class="legend-item"><span class="legend-sym hihat">⊘</span> <span class="legend-desc"><strong>Semiabierto:</strong> Círculo con barra (R/L)</span></div>
+                            <div class="legend-item"><span class="legend-sym hihat">⊗</span> <span class="legend-desc"><strong>Abierto:</strong> Círculo con cruz (R/L)</span></div>
+                            <div class="legend-item"><span class="legend-sym hihat">×</span> <span class="legend-desc"><strong>De pedal:</strong> Cruz bajo pentagrama (F)</span></div>
+                        </div>
+                    </div>
+                    <div class="legend-category">
+                        <span class="cat-title">CAJA (SNARE)</span>
+                        <div class="legend-items">
+                            <div class="legend-item"><span class="legend-sym snare">●</span> <span class="legend-desc"><strong>Normal:</strong> Óvalo en espacio 3 (L/R)</span></div>
+                            <div class="legend-item"><span class="legend-sym snare">◇</span> <span class="legend-desc"><strong>Electrónica / Cross-stick:</strong> Diamante espacio 3</span></div>
+                        </div>
+                    </div>
+                    <div class="legend-category">
+                        <span class="cat-title">BOMBO & PLATOS</span>
+                        <div class="legend-items">
+                            <div class="legend-item"><span class="legend-sym kick">●</span> <span class="legend-desc"><strong>Bombo:</strong> Óvalo espacio 1 (K)</span></div>
+                            <div class="legend-item"><span class="legend-sym ride">×</span> <span class="legend-desc"><strong>Plato Ride:</strong> Cruz línea 5</span></div>
+                            <div class="legend-item"><span class="legend-sym crash">×</span> <span class="legend-desc"><strong>Crash:</strong> Línea adicional superior</span></div>
+                        </div>
+                    </div>
+                    <div class="legend-category">
+                        <span class="cat-title">TOMS (1, 2, 3)</span>
+                        <div class="legend-items">
+                            <div class="legend-item"><span class="legend-sym tom1">●</span> <span class="legend-desc"><strong>Tom Agudo (1):</strong> Línea 4</span></div>
+                            <div class="legend-item"><span class="legend-sym tom2">●</span> <span class="legend-desc"><strong>Tom Medio (2):</strong> Línea 3</span></div>
+                            <div class="legend-item"><span class="legend-sym tom3">●</span> <span class="legend-desc"><strong>Tom de Piso (3):</strong> Línea 2</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Step Sequencer Matrix (Matches Image 1 Bottom) -->
+        <div class="sequencer-wrapper">
+            <div class="sequencer-card-header">
+                <div class="seq-header-left">
+                    <span class="seq-header-title">🎛️ MATRIZ DE COMPÁS & NOTAS</span>
+                    <span class="seq-header-subtitle">Haz clic en cualquier casilla para pegar o quitar notas</span>
+                </div>
+                <div class="seq-header-controls">
+                    <!-- Subdivisión rápida: Corcheas (Doble), Tresillos (Triple), Semicorcheas (Cuatro), Seisillos (Sextu) -->
+                    <div class="subdiv-selector-group">
+                        <span class="ctrl-label">SUBDIVISIÓN:</span>
+                        <button class="subdiv-btn" data-sub="2" title="2 golpes por pulso (Corcheas)">♪ Doble (2)</button>
+                        <button class="subdiv-btn" data-sub="3" title="3 golpes por pulso (Tresillos)">3️⃣ Triple (3)</button>
+                        <button class="subdiv-btn active" data-sub="4" title="4 golpes por pulso (Semicorcheas)">4️⃣ Cuatro (4)</button>
+                        <button class="subdiv-btn" data-sub="6" title="6 golpes por pulso (Sextillos - Fill Imagen 1)">6️⃣ Sextu (6)</button>
+                    </div>
+
+                    <!-- Pulsos / Compás -->
+                    <div class="seq-beats-group">
+                        <span class="ctrl-label">COMPÁS:</span>
+                        <select id="seq-time-signature-select" class="custom-select small">
+                            <option value="4/4" selected>4/4 (4 pulsos)</option>
+                            <option value="3/4">3/4 (3 pulsos)</option>
+                            <option value="6/8">6/8 (6 pulsos)</option>
+                            <option value="2/4">2/4 (2 pulsos)</option>
+                            <option value="5/4">5/4 (5 pulsos)</option>
+                            <option value="7/8">7/8 (7 pulsos)</option>
+                            <option value="12/8">12/8 (12 pulsos)</option>
+                        </select>
+                    </div>
+
+                    <!-- Presets & Limpiar & Guitar Hero Toggle -->
+                    <div class="seq-actions-group">
+                        <button id="toggle-grid-scroll-btn" class="notation-btn active" title="Alternar entre Pista Continua (Guitar Hero / Scroll suave) y Compás Fijo en la Matriz">🎮 GUITAR HERO: ON</button>
+                        <select id="seq-preset-patterns-select" class="custom-select small" title="Cargar patrón rítmico o fill de práctica">
+                            <option value="" disabled selected>Ritmos & Fills...</option>
+                            <option value="fill_image1">🥁 Fill Sextuple (Imagen 1)</option>
+                            <option value="rock_basic">🎸 Rock Beat 4/4 (Básico)</option>
+                            <option value="shuffle_triplet">🎷 Shuffle Blues (Tresillos)</option>
+                            <option value="ballad_6_8">🎵 Balada 6/8</option>
+                            <option value="funk_16th">⚡ Funk Sincopado (16th)</option>
+                        </select>
+                        <button id="clear-grid-measure-btn" class="btn btn-secondary-subtle small-btn" title="Borrar todas las notas del compás">
+                            🗑️ Limpiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="grid-sequencer-container" class="grid-sequencer-container">
+                <!-- Dynamically rendered by grid-sequencer.js -->
+            </div>
+        </div>
+
+        <!-- View Switcher Tabs (Tablet & Mobile only) -->
+        <div class="studio-view-tabs" id="studio-view-tabs">
+            <button class="view-tab-btn active" data-view="both">📱 Todo</button>
+            <button class="view-tab-btn" data-view="pads">⚡ Batería</button>
+            <button class="view-tab-btn" data-view="metro">⏱ Metrónomo</button>
+        </div>
+
+        <!-- Section 3: Bottom Control Panel (Metronome & Donner DED-300X Kit) -->
+        <div class="bottom-studio-grid">
+            <!-- Left: Donner Kit Hit Feedback & Accuracy -->
+            <div class="panel-card kit-accuracy-panel">
+                <div class="panel-header kit-panel-header">
+                    <div class="panel-title-group">
+                        <span class="panel-title">⚡ DONNER DED-300X PADS & EVALUACIÓN</span>
+                        <span class="panel-subtitle">Haz clic en los pads o tócalos en tu batería física</span>
+                        <span id="console-kit-badge" class="console-kit-badge hidden">Consola: Kit #1</span>
+                    </div>
+                    <div class="panel-header-actions">
+                        <button id="open-calibration-btn" class="btn btn-secondary-subtle small-btn" title="Iniciar asistente guiado para calibrar cada parche y aro">
+                            🎯 Calibrar Batería
+                        </button>
+                        <div class="panel-kit-quickselect">
+                            <span class="quick-kit-label">KIT:</span>
+                            <select id="drum-kit-select-panel" class="custom-select small kit-dropdown" title="Cambiar preset de sonido de la batería">
+                                <option value="original">🥁 Acústico Studio (Samples Reales)</option>
+                                <option value="rock">🎸 Rock & Heavy Punch</option>
+                                <option value="jazz">🎷 Jazz Vintage Bop</option>
+                                <option value="electronic">⚡ Electro 808</option>
+                                <option value="donner_direct">🎧 Audio Directo Consola Donner</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Donner Direct Mode Informational Banner -->
+                <div id="donner-direct-banner" class="donner-direct-banner hidden">
+                    <span class="direct-icon">🎧</span>
+                    <div class="direct-text">
+                        <strong>Modo Audio Directo Consola:</strong> Batería virtual de la web silenciada para escuchar tus 100+ sonidos nativos por los audífonos de la consola Donner DED-300X (conecta cable AUX de PC a Donner AUX IN para escuchar la canción al mismo tiempo).
+                    </div>
+                </div>
+
+                <!-- Audio Unlock Banner (shows if browser blocks audio until first user gesture) -->
+                <div id="audio-unlock-banner" class="audio-unlock-banner hidden">
+                    <span class="unlock-icon">🔊</span>
+                    <span class="unlock-text">Audio pausado por el navegador. <strong>Haz clic aquí</strong> para escuchar tu batería en vivo.</span>
+                    <button id="audio-unlock-btn" class="audio-unlock-btn">ACTIVAR SONIDO</button>
+                </div>
+
+                <!-- Floating Accuracy Badge -->
+                <div id="accuracy-floating-badge" class="accuracy-badge">¡PERFECTO!</div>
+
+                <!-- Interactive Visual Drum Kit -->
+                <div class="drum-kit-visualizer">
+                    <div class="kit-row cymbals-row">
+                        <div class="drum-pad cymbal" data-row="CRASH">
+                            <span class="pad-label">CRASH</span>
+                            <span class="pad-note">49</span>
+                        </div>
+                        <div class="drum-pad cymbal" data-row="HI_HAT">
+                            <span class="pad-label">HI-HAT</span>
+                            <span class="pad-note">42/46</span>
+                        </div>
+                        <div class="drum-pad cymbal" data-row="RIDE">
+                            <span class="pad-label">RIDE</span>
+                            <span class="pad-note">51</span>
+                        </div>
+                    </div>
+                    <div class="kit-row toms-row">
+                        <div class="drum-pad tom" data-row="TOM_1">
+                            <span class="pad-label">TOM 1</span>
+                            <span class="pad-note">48</span>
+                        </div>
+                        <div class="drum-pad tom" data-row="TOM_2">
+                            <span class="pad-label">TOM 2</span>
+                            <span class="pad-note">45</span>
+                        </div>
+                    </div>
+                    <div class="kit-row snare-floor-row">
+                        <div class="drum-pad snare" data-row="SNARE">
+                            <span class="pad-label">SNARE</span>
+                            <span class="pad-note">38/40</span>
+                        </div>
+                        <div class="drum-pad kick" data-row="KICK">
+                            <span class="pad-label">BOMBO / KICK</span>
+                            <span class="pad-note">36</span>
+                        </div>
+                        <div class="drum-pad tom" data-row="TOM_3">
+                            <span class="pad-label">TOM 3</span>
+                            <span class="pad-note">43</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-Time Donner DED-300X Sensors Monitor (Pedal & Velocity) -->
+                <div class="donner-sensors-bar">
+                    <div class="sensor-meter-box">
+                        <div class="sensor-meter-header">
+                            <span class="sensor-title">🦶 PEDAL HI-HAT:</span>
+                            <span id="pedal-gauge-status" class="sensor-val-badge">0% (Abierto)</span>
+                        </div>
+                        <div class="sensor-track">
+                            <div id="pedal-gauge-fill" class="sensor-fill pedal-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="sensor-meter-box">
+                        <div class="sensor-meter-header">
+                            <span class="sensor-title">⚡ DINÁMICA DE GOLPE:</span>
+                            <span id="velocity-gauge-status" class="sensor-val-badge">Vel: 0 (mf)</span>
+                        </div>
+                        <div class="sensor-track">
+                            <div id="velocity-gauge-fill" class="sensor-fill vel-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Precision & Groove Pocket Timing Meter (Roland/Yamaha Style Time Check) -->
+                <div class="timing-pocket-meter-container">
+                    <div class="timing-meter-header">
+                        <span class="timing-meter-title">🎯 PRECISIÓN & GROOVE:</span>
+                        <span id="timing-offset-badge" class="timing-offset-badge perfect">0 ms (100%)</span>
+                    </div>
+                    <div class="timing-groove-track">
+                        <div class="timing-track-labels">
+                            <span class="track-label early">◀ EARLY</span>
+                            <span class="track-label pocket">PERFECT</span>
+                            <span class="track-label late">LATE ▶</span>
+                        </div>
+                        <div class="timing-track-bar">
+                            <div class="timing-zone-bg early"></div>
+                            <div class="timing-zone-bg center"></div>
+                            <div class="timing-zone-bg late"></div>
+                            <div class="timing-center-notch"></div>
+                            <div id="timing-pocket-needle" class="timing-needle" style="left: 50%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scoring Stats: Precision %, Points, Perfect, Early, Late, Off -->
+                <div class="scoring-stats-row">
+                    <div class="stat-box">
+                        <span class="stat-num" id="accuracy-pct">100%</span>
+                        <span class="stat-name">PRECISIÓN</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-num stat-perfect" id="perfect-count">0</span>
+                        <span class="stat-name">PERFECTO</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-num stat-early" id="early-count">0</span>
+                        <span class="stat-name">EARLY</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-num stat-late" id="late-count">0</span>
+                        <span class="stat-name">LATE</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-num stat-miss" id="miss-count">0</span>
+                        <span class="stat-name">OFF</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-num" id="score-display">0</span>
+                        <span class="stat-name">PUNTOS</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Metronome (Matches Images 2 & 3!) -->
+            <div class="panel-card metronome-panel">
+                <div class="panel-header">
+                    <span class="panel-title">METRONOME</span>
+                    <div class="header-click-toggle">
+                        <label class="toggle-control small">
+                            <input type="checkbox" id="metronome-click-toggle" checked>
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-text">Sonido Click</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Pulses & Subdivisions Controller (Images 2 & 3 + User custom rhythm request) -->
+                <div class="metronome-division-card">
+                    <div class="metro-row-control">
+                        <div class="metro-label-group">
+                            <span class="metro-ctrl-label">PULSOS / COMPÁS:</span>
+                            <span id="metro-beats-val" class="metro-val-tag">4 pulsos</span>
+                        </div>
+                        <div class="metro-pill-group" id="metro-beats-pills">
+                            <button class="metro-pill" data-beats="2">2</button>
+                            <button class="metro-pill" data-beats="3">3</button>
+                            <button class="metro-pill active" data-beats="4">4</button>
+                            <button class="metro-pill" data-beats="5">5</button>
+                            <button class="metro-pill" data-beats="6">6</button>
+                            <button class="metro-pill" data-beats="7">7</button>
+                            <button class="metro-pill" data-beats="8">8</button>
+                            <button class="metro-pill" data-beats="12">12</button>
+                        </div>
+                    </div>
+
+                    <div class="metro-row-control">
+                        <div class="metro-label-group">
+                            <span class="metro-ctrl-label">CLICKS POR PULSO (SUBDIVISIÓN):</span>
+                            <span id="metro-clicks-val" class="metro-val-tag">1 click (♩)</span>
+                        </div>
+                        <div class="metro-pill-group" id="metro-clicks-pills">
+                            <button class="metro-pill active" data-clicks="1" title="1 click por pulso (Negras ♩)">1 (♩)</button>
+                            <button class="metro-pill" data-clicks="2" title="2 clicks por pulso (Corcheas ♪♪ - un-y, dos-y...)">2 (un-y)</button>
+                            <button class="metro-pill" data-clicks="3" title="3 clicks por pulso (Tresillos)">3 (triple)</button>
+                            <button class="metro-pill" data-clicks="4" title="4 clicks por pulso (Semicorcheas)">4 (cuatro)</button>
+                            <button class="metro-pill" data-clicks="6" title="6 clicks por pulso (Seisillos)">6 (sextu)</button>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Live Calculation Banner -->
+                    <div id="metro-calculation-badge" class="metro-calc-badge">
+                        ⚡ 4 pulsos × 1 click = <strong>4 clicks por compás</strong>
+                    </div>
+
+                    <!-- Sub-Beat Real-Time Ticker Display -->
+                    <div id="metro-subdivision-ticker" class="metro-sub-ticker" style="display: none;"></div>
+                </div>
+
+                <!-- Dynamic Flashing Beat Orbs (Image 3) -->
+                <div id="metronome-orbs-container" class="metronome-orbs-container">
+                    <div class="metronome-orb accent" data-beat="0"><span class="orb-num">1</span></div>
+                    <div class="metronome-orb" data-beat="1"><span class="orb-num">2</span></div>
+                    <div class="metronome-orb" data-beat="2"><span class="orb-num">3</span></div>
+                    <div class="metronome-orb" data-beat="3"><span class="orb-num">4</span></div>
+                </div>
+
+                <!-- Tempo Readout & Delta Buttons (Images 2 & 3) -->
+                <div class="metronome-tempo-control-grid">
+                    <div class="delta-col">
+                        <button id="bpm-minus-1" class="bpm-delta-btn">-1</button>
+                        <button id="bpm-minus-5" class="bpm-delta-btn">-5</button>
+                    </div>
+
+                    <div class="bpm-center-readout">
+                        <div class="main-bpm" id="bpm-display">83</div>
+                        <div class="tempo-term" id="tempo-term-display">Andante</div>
+                        <div id="bpm-lock-indicator" class="bpm-lock-indicator" style="display: none;" title="BPM fijo definido para práctica">🔒 BPM Fijado</div>
+                    </div>
+
+                    <div class="delta-col">
+                        <button id="bpm-plus-1" class="bpm-delta-btn">+1</button>
+                        <button id="bpm-plus-5" class="bpm-delta-btn">+5</button>
+                    </div>
+                </div>
+
+                <!-- Tempo Slider (Images 2 & 3) -->
+                <div class="bpm-slider-wrap">
+                    <input type="range" id="bpm-slider" min="30" max="300" value="83" class="metronome-slider">
+                </div>
+
+                <!-- Reset & Tap Tempo Controls -->
+                <div class="metronome-footer-actions">
+                    <button id="reset-bpm-btn" class="btn btn-secondary-subtle">
+                        ↺ Reset a BPM Original
+                    </button>
+                    <button id="tap-tempo-btn" class="btn btn-secondary-subtle">
+                        🥁 Tap Tempo
+                    </button>
+                </div>
+
+                <!-- Big Orange Master Play / Pause Button (Images 2 & 3) -->
+                <div class="master-play-container">
+                    <button id="master-play-btn" class="master-play-btn" title="Iniciar o pausar práctica (Barra Espaciadora)">
+                        <span id="play-icon" class="play-btn-icon">▶</span>
+                        <span id="play-text" class="play-btn-text">INICIAR PRÁCTICA</span>
+                    </button>
+                </div>
+            </div>
+        </div> <!-- .bottom-studio-grid -->
+    </div> <!-- .practicer-main-col -->
+
+    <!-- Backdrop overlay for mobile drawer -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+    <!-- Lateral Full Score Sidebar -->
+    <aside id="lateral-score-sidebar" class="lateral-score-sidebar">
+            <!-- Dynamically populated by full-score-sidebar.js -->
+        </aside>
+    </div> <!-- .studio-two-column-layout -->
+    </main>
+
+    <!-- Floating button to reopen sidebar if collapsed -->
+    <button id="open-sidebar-floating-btn" class="open-sidebar-floating-btn" style="display: none;" title="Abrir Partitura Completa">
+        📖 Partitura Completa
+    </button>
+
+    <!-- Mobile Sticky Action Bar for quick practice control on small screens -->
+    <div id="mobile-sticky-playbar" class="mobile-sticky-playbar">
+        <div class="m-bar-left">
+            <button id="mobile-prev-btn" class="m-bar-btn" title="Compás Anterior">◀</button>
+            <div class="m-bar-meas">
+                <span class="m-bar-meas-tag">C</span>
+                <span id="mobile-meas-num" class="m-bar-meas-val">1</span>
+            </div>
+            <button id="mobile-next-btn" class="m-bar-btn" title="Compás Siguiente">▶</button>
+        </div>
+        <button id="mobile-play-btn" class="m-bar-play-btn" title="Iniciar o pausar práctica">
+            <span id="mobile-play-icon">▶</span>
+            <span id="mobile-play-text">PRACTICAR</span>
+        </button>
+        <div class="m-bar-right">
+            <div class="m-bar-bpm">
+                <span id="mobile-bpm-val" class="m-bar-bpm-num">83</span>
+                <span class="m-bar-bpm-tag">BPM</span>
+            </div>
+            <button id="mobile-open-sidebar-btn" class="m-bar-btn m-bar-score" title="Abrir Partitura">📖</button>
+        </div>
+    </div>
+
+    <!-- Academy & Lessons Modal -->
+    <div id="academy-modal" class="modal-overlay">
+        <div class="modal-content academy-modal-box">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <h3>🎓 Academia de Batería DED-300X</h3>
+                    <p>Rudimentos Fundamentales (PAS 40), Fills Profesionales y Grooves de Coordinación con bucle aislado de práctica.</p>
+                </div>
+                <button id="close-academy-modal-btn" class="modal-close-btn">&times;</button>
+            </div>
+
+            <!-- Categories Filter Tabs -->
+            <div class="academy-category-tabs">
+                <button class="academy-tab-btn active" data-category="all">Todos</button>
+                <button class="academy-tab-btn" data-category="Rudimentos Fundamentales">🥁 Rudimentos (PAS 40)</button>
+                <button class="academy-tab-btn" data-category="Fills & Redobles">💥 Fills & Redobles</button>
+                <button class="academy-tab-btn" data-category="Grooves & Independencia">🎵 Grooves & Independencia</button>
+            </div>
+
+            <!-- Lessons Grid Container -->
+            <div class="academy-lessons-scroll">
+                <div id="academy-lessons-container" class="academy-lessons-grid">
+                    <div class="loading-hint">Cargando lecciones profesionales...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Songsterr Search & Presets Modal -->
+    <div id="songsterr-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <h3>Descargar Partituras de Songsterr</h3>
+                    <p>Busca cualquier canción por nombre, artista o pega directamente el enlace de Songsterr</p>
+                </div>
+                <button id="close-modal-btn" class="modal-close-btn">&times;</button>
+            </div>
+
+            <div class="modal-search-bar">
+                <input type="text" id="song-search-input" placeholder="Ej: Hoobastank The Reason, Smells Like Teen Spirit, o URL de Songsterr...">
+                <button id="song-search-btn" class="btn btn-primary">Buscar</button>
+            </div>
+
+            <!-- Featured Presets -->
+            <div class="presets-section">
+                <span class="presets-label">EJERCICIOS & CANCIONES DESTACADAS:</span>
+                <div id="presets-list-container" class="presets-chips-wrap">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <div class="modal-results-container">
+                <span class="results-header">RESULTADOS DE SONGSTERR:</span>
+                <div id="search-results-list" class="search-results-list">
+                    <div class="search-hint">Escribe una canción o selecciona un ejercicio arriba para comenzar.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MIDI Diagnostic & Settings Modal -->
+    <div id="midi-diagnostic-modal" class="modal-overlay">
+        <div class="modal-content midi-modal-box">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <h3>🎹 Diagnóstico y Conexión MIDI USB</h3>
+                    <p>Conexión, prueba en tiempo real y detección para tu Donner DED-300X</p>
+                </div>
+                <button id="close-midi-modal-btn" class="modal-close-btn">&times;</button>
+            </div>
+
+            <!-- Insecure context alert if accessed via network IP without HTTPS -->
+            <div id="midi-insecure-warning" class="midi-insecure-alert hidden">
+                <span class="alert-icon">⚠️</span>
+                <div class="alert-text">
+                    <strong>Atención: Estás accediendo por dirección IP de red.</strong><br>
+                    Por seguridad, los navegadores (Chrome, Edge) <em>bloquean</em> el acceso al puerto USB-MIDI a menos que la página esté en <code>localhost</code> o con <code>HTTPS</code>.<br>
+                    <strong>Solución:</strong> Abre el programa directamente en la computadora donde tienes conectada la batería mediante <code>iniciar.bat</code> (en <code>http://localhost:5000</code>).
+                </div>
+            </div>
+
+            <div class="midi-modal-body">
+                <!-- Status & Re-scan bar -->
+                <div class="midi-status-toolbar">
+                    <div class="status-summary">
+                        <span id="modal-midi-dot" class="status-dot offline"></span>
+                        <span id="modal-midi-status-text">Buscando puertos MIDI USB...</span>
+                    </div>
+                    <button id="rescan-midi-btn" class="btn btn-primary-compact">
+                        🔄 Re-escanear / Solicitar Permiso
+                    </button>
+                </div>
+
+                <!-- Input Port Selector -->
+                <div class="midi-device-selector-group">
+                    <label for="midi-input-select" class="midi-label">ENTRADA MIDI SELECCIONADA:</label>
+                    <div class="select-row">
+                        <select id="midi-input-select" class="custom-select full-width">
+                            <option value="all">Escuchar todas las entradas (Recomendado)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Live MIDI Monitor Console -->
+                <div class="midi-monitor-section">
+                    <div class="monitor-header">
+                        <span class="monitor-title">📡 MONITOR DE GOLPES EN TIEMPO REAL:</span>
+                        <span class="monitor-hint">Golpea cualquier pad o pedal de tu Donner para probar</span>
+                        <button id="clear-midi-log-btn" class="btn-text-clear">Limpiar</button>
+                    </div>
+                    <div id="midi-live-console" class="midi-live-console">
+                        <div class="console-empty-hint">Esperando golpes de la batería...</div>
+                    </div>
+                </div>
+
+                <!-- Pad Mapping Quick Reference -->
+                <div class="midi-mapping-section">
+                    <span class="mapping-title">MAPEO ESTÁNDAR DONNER DED-300X:</span>
+                    <div class="midi-pads-grid">
+                        <div class="midi-pad-chip"><span class="pad-name">Bombo (Kick)</span> <span class="pad-note">Nota 36</span></div>
+                        <div class="midi-pad-chip"><span class="pad-name">Caja (Snare)</span> <span class="pad-note">Nota 38 / 40</span></div>
+                        <div class="midi-pad-chip"><span class="pad-name">Hi-Hat Cerrado</span> <span class="pad-note">Nota 42</span></div>
+                        <div class="midi-pad-chip"><span class="pad-name">Hi-Hat Pedal</span> <span class="pad-note">Nota 44</span></div>
+                        <div class="midi-pad-chip"><span class="pad-name">Hi-Hat Abierto</span> <span class="pad-note">Nota 46</span></div>
+                        <div class="midi-pad-chip"><span class="pad-name">Tom 1 (Agudo)</span> <span class="pad-note">Nota 48</span></div>
+                        <div class="midi-pad-chip"><span class="pad-name">Tom 2 (Medio)</span> <span class="pad-note">Nota 45</span></div>
+                        <div class="midi-pad-chip"><span class="pad-name">Tom 3 (Piso)</span> <span class="pad-note">Nota 41 / 43</span></div>
+                        <div class="midi-pad-chip"><span class="pad-name">Crash</span> <span class="pad-note">Nota 49 / 57</span></div>
+                        <div class="midi-pad-chip"><span class="pad-name">Plato Ride</span> <span class="pad-note">Nota 51 / 53</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calibration Wizard Modal -->
+    <div id="calibration-modal" class="modal-overlay">
+        <div class="modal-content calibration-modal-card">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <h3>🎯 ASISTENTE DE CALIBRACIÓN DONNER DED-300X</h3>
+                    <p>Golpea cada elemento de tu batería para calibrar notas, aros y pedales con máxima precisión.</p>
+                </div>
+                <button id="close-calib-modal-btn" class="modal-close-btn">&times;</button>
+            </div>
+
+            <div class="calib-progress-section">
+                <div class="calib-progress-track">
+                    <div id="calib-progress-bar" class="calib-progress-fill" style="width: 0%;"></div>
+                </div>
+                <span id="calib-step-counter" class="calib-counter">Paso 1 de 11</span>
+            </div>
+
+            <div id="calib-step-container" class="calib-step-container">
+                <div class="calib-step-card">
+                    <div id="calib-step-icon" class="calib-icon">🥁</div>
+                    <h2 id="calib-step-title" class="calib-step-heading">Bombo / Kick</h2>
+                    <p id="calib-step-prompt" class="calib-prompt">Pisa el pedal del Bombo con fuerza media o normal</p>
+                    
+                    <div id="calib-step-feedback" class="calib-feedback-box waiting">
+                        <span class="pulse-dot"></span> Esperando golpe en la batería...
+                    </div>
+                </div>
+            </div>
+
+            <div class="calib-footer-actions">
+                <button id="calib-reset-factory-btn" class="btn btn-secondary-subtle">
+                    ↺ Restaurar Fábrica
+                </button>
+                <div class="calib-right-btns">
+                    <button id="calib-skip-btn" class="btn btn-secondary">
+                        Saltar este pad ➔
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner-box">
+            <div class="spinner-ring"></div>
+            <div id="loading-msg" class="loading-text">Cargando...</div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/audio-engine.js?v=5"></script>
+    <script src="js/midi-controller.js?v=5"></script>
+    <script src="js/notation-canvas.js?v=5"></script>
+    <script src="js/grid-sequencer.js?v=5"></script>
+    <script src="js/metronome.js?v=5"></script>
+    <script src="js/full-score-sidebar.js?v=5"></script>
+    <script src="js/calibration-wizard.js?v=5"></script>
+    <script src="js/app.js?v=5"></script>
+</body>
+</html>

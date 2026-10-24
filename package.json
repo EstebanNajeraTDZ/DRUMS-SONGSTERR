@@ -1,0 +1,28 @@
+{
+  "name": "songster-drums-practice",
+  "version": "1.0.0",
+  "description": "Una aplicación completa diseñada específicamente para tu batería electrónica **Donner DED-300X**, combinando: 1. **Detección MIDI plug-and-play con latencia cero** y sintetizador de percusión acústica. 2. **Descarga gratuita de partituras y pistas de batería desde Songsterr** (con exportación a MIDI y Guitar Pro 5 `.gp5`). 3. **Practicador visual interactivo** idéntico a tus capturas (notación pentagrama + matriz secuenciador con sticking `R` / `L` / `K` y subdivisiones). 4. **Metrónomo profesional** inspirado en tus capturas (orbes luminosos, display gigante, botones `[-1]`, `[+1]`, `[-5]`, `[+5]`, slider, términos italianos y tap tempo). 5. **Modo \"Pedazo por Pedazo\" (Chunking)** para practicar compás por compás, 2 compases, 4 compases o flujo continuo con bucles por secciones.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "canvas-confetti": "^1.9.4",
+    "lucide-react": "^1.61.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  }
+}
